@@ -1,5 +1,7 @@
 package com.example.joinlines;
 
+import javafx.scene.shape.Polyline;
+
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.*;
@@ -14,18 +16,41 @@ public class LineJoiner {
         this.linesToJoin = new ArrayList<>(inputLines);
     }
 
-    public List<LinkedList<Point2D>> generatePolylines() {
+    public List<Polyline> createListOfPolylines() {
+        List<Polyline> polylines = new ArrayList<>();
+        List<LinkedList<Point2D>> listOfListOfPoints = generateListOfSegments();
+
+        for (LinkedList<Point2D> listOfPoints : listOfListOfPoints) {
+            polylines.add(createPolylineFromListOfPoints(listOfPoints));
+        }
+        return polylines;
+    }
+    private Polyline createPolylineFromListOfPoints(LinkedList<Point2D> listOPoints) {
+        List<Double> listOfCoordinates = new ArrayList<>();
+        for (Point2D point : listOPoints) {
+            listOfCoordinates.add(point.getX());
+            listOfCoordinates.add(point.getY());
+        }
+
+        Polyline polyline = new Polyline();
+        polyline.getPoints().addAll(listOfCoordinates.toArray(new Double[0]));
+        System.out.println(polyline);
+        return  polyline;
+    }
+
+    private List<LinkedList<Point2D>> generateListOfSegments() {
         createIncidenceMap();
-        List<LinkedList<Point2D>> polyLines = new ArrayList<>();
+        List<LinkedList<Point2D>> segments = new ArrayList<>();
         while (linesToJoin.size() > 0) {
             Line2D beginningLine = linesToJoin.get(0);
             // Because of the conditions of the problem, every line appears in exactly one polyline
             // (in "worst case") the polyline consisting just of this line -
             // so that we don't need to further consider the lines which were already appended
             linesToJoin.remove(0);
-            polyLines.add(generatePolylineFromBeginningLine(beginningLine));
+            segments.add(generatePolylineFromBeginningLine(beginningLine));
         }
-        return polyLines;
+        //System.out.println(segments);
+        return segments;
     }
 
     // Create a dictionary with a point a key and as value a list of lines which have this point at their beginning or end

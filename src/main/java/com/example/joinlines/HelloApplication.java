@@ -35,11 +35,11 @@ public class HelloApplication extends Application {
             scanner = new Scanner(file);
             while (scanner.hasNextLine()) {
                 String[] lineParameters = scanner.nextLine().split(" ");
-                lines.add(new Line2D.Float(
-                                Float.parseFloat(lineParameters[0]),
-                                Float.parseFloat(lineParameters[1]),
-                                Float.parseFloat(lineParameters[2]),
-                                Float.parseFloat(lineParameters[3])
+                lines.add(new Line2D.Double(
+                                Double.parseDouble(lineParameters[0]),
+                                Double.parseDouble(lineParameters[1]),
+                                Double.parseDouble(lineParameters[2]),
+                                Double.parseDouble(lineParameters[3])
                         )
                 );
             }
@@ -49,7 +49,8 @@ public class HelloApplication extends Application {
         }
 
         LineJoiner lineJoiner = new LineJoiner(lines);
-        System.out.println(lineJoiner.generatePolylines());
+        lineJoiner.createListOfPolylines();
+
 
         launch();
     }

@@ -16,26 +16,18 @@ public class LineJoiner {
         this.linesToJoin = new ArrayList<>(inputLines);
     }
 
-    public List<Polyline> createListOfPolylines() {
-        List<Polyline> polylines = new ArrayList<>();
+    // We return a dictionary with a polyline as a key and its lenght as value
+    public HashMap<Polyline, Double> createPolylinesDictionary() {
+        HashMap<Polyline, Double> polylinesDictionary = new HashMap<>();
         List<LinkedList<Point2D>> listOfListOfPoints = generateListOfSegments();
 
         for (LinkedList<Point2D> listOfPoints : listOfListOfPoints) {
-            polylines.add(createPolylineFromListOfPoints(listOfPoints));
-        }
-        return polylines;
-    }
-    private Polyline createPolylineFromListOfPoints(LinkedList<Point2D> listOPoints) {
-        List<Double> listOfCoordinates = new ArrayList<>();
-        for (Point2D point : listOPoints) {
-            listOfCoordinates.add(point.getX());
-            listOfCoordinates.add(point.getY());
+            Polyline polyline = createPolylineFromListOfPoints(listOfPoints);
+            Double length = calculateLength(listOfPoints);
+            polylinesDictionary.put(polyline, length);
         }
 
-        Polyline polyline = new Polyline();
-        polyline.getPoints().addAll(listOfCoordinates.toArray(new Double[0]));
-        System.out.println(polyline);
-        return  polyline;
+        return polylinesDictionary;
     }
 
     private List<LinkedList<Point2D>> generateListOfSegments() {
@@ -47,7 +39,7 @@ public class LineJoiner {
             // (in "worst case") the polyline consisting just of this line -
             // so that we don't need to further consider the lines which were already appended
             linesToJoin.remove(0);
-            segments.add(generatePolylineFromBeginningLine(beginningLine));
+            segments.add(generateListOfFromBeginningLine(beginningLine));
         }
         //System.out.println(segments);
         return segments;
@@ -73,7 +65,7 @@ public class LineJoiner {
                 .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
     }
 
-    private LinkedList<Point2D> generatePolylineFromBeginningLine(Line2D beginningLine) {
+    private LinkedList<Point2D> generateListOfFromBeginningLine(Line2D beginningLine) {
         LinkedList<Point2D> listOfPoints = new LinkedList<>();
         Point2D beginningPoint = beginningLine.getP1();
         Point2D endingPoint = beginningLine.getP2();
@@ -87,6 +79,12 @@ public class LineJoiner {
             Line2D lineToAppend = lineToAppendAtTheBeginning.get();
             Point2D p1 = lineToAppend.getP1();
             Point2D p2 = lineToAppend.getP2();
+
+            // avoid running in circles if the segments form a closed loop
+            if (beginningPoint.equals(endingPoint)) {
+                linesToJoin.removeIf(line -> line.equals(lineToAppend));
+                return  listOfPoints;
+            }
 
             // We consider that the lines doesn't have orientation, so we can join them if both ot them have a common point
             if (beginningPoint.equals(p2)) {
@@ -104,8 +102,10 @@ public class LineJoiner {
             beginningPoint = listOfPoints.getFirst();
             beginningLine = lineToAppend;
             //System.out.println(listOfPoints);
+
             lineToAppendAtTheBeginning = findLineToAppend(beginningPoint, beginningLine);
         }
+
 
 
         // We keep adding lines (their points) at the end until it is not more possible
@@ -149,5 +149,32 @@ public class LineJoiner {
         }
 
         return Optional.empty();
+    }
+
+    private Polyline createPolylineFromListOfPoints(LinkedList<Point2D> listOPoints) {
+        List<Double> listOfCoordinates = new ArrayList<>();
+        for (Point2D point : listOPoints) {
+            listOfCoordinates.add(point.getX());
+            listOfCoordinates.add(point.getY());
+        }
+
+        Polyline polyline = new Polyline();
+        polyline.getPoints().addAll(listOfCoordinates.toArray(new Double[0]));
+        // System.out.println(polyline);
+        return polyline;
+    }
+
+    private Double calculateLength(LinkedList<Point2D> listOfPoints) {
+        Double length = 0.0;
+
+        // We add the euclidean distances from one point to the next
+        for (int i = 0; i < listOfPoints.size() - 1; i++) {
+            Double x1 = listOfPoints.get(i).getX();
+            Double y1 = listOfPoints.get(i).getY();
+            Double x2 = listOfPoints.get(i + 1).getX();
+            Double y2 = listOfPoints.get(i + 1).getY();
+            length += Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        }
+        return length;
     }
 }

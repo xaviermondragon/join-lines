@@ -14,6 +14,7 @@ import java.util.Scanner;
 
 public class HelloApplication extends Application {
     private static final String INPUT_FILE = "src/main/resources/input56dad8.txt";
+    //private static final String INPUT_FILE = "src/main/resources/myinputfile.txt";
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -49,7 +50,7 @@ public class HelloApplication extends Application {
         }
 
         LineJoiner lineJoiner = new LineJoiner(lines);
-        lineJoiner.createListOfPolylines();
+        System.out.println(lineJoiner.createPolylinesDictionary());
 
 
         launch();

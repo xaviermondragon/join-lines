@@ -16,18 +16,17 @@ public class LineJoiner {
         this.linesToJoin = new ArrayList<>(inputLines);
     }
 
-    // We return a dictionary with a polyline as a key and its lenght as value
-    public HashMap<Polyline, Double> createPolylinesDictionary() {
-        HashMap<Polyline, Double> polylinesDictionary = new HashMap<>();
+    // We return a list of polylines sorted according to their length
+    public List<PolylineWithLength> createPolylinesWithLenght() {
+        List<PolylineWithLength> polylinesWithLength = new ArrayList<>();
         List<LinkedList<Point2D>> listOfListOfPoints = generateListOfSegments();
 
         for (LinkedList<Point2D> listOfPoints : listOfListOfPoints) {
-            Polyline polyline = createPolylineFromListOfPoints(listOfPoints);
-            Double length = calculateLength(listOfPoints);
-            polylinesDictionary.put(polyline, length);
+            polylinesWithLength.add(new PolylineWithLength(listOfPoints));
         }
 
-        return polylinesDictionary;
+        Collections.sort(polylinesWithLength);
+        return polylinesWithLength;
     }
 
     private List<LinkedList<Point2D>> generateListOfSegments() {
